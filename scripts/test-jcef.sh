@@ -9,5 +9,6 @@ if [ ! -d "$LIBS" ]; then
 fi
 
 CLASSPATH="$LIBS/*"
+NATIVE=$DIR/../native/
 
-exec java -cp "$CLASSPATH" "$@"
+exec java -Djava.library.path="$NATIVE" -cp "$CLASSPATH" "$@"

@@ -21,6 +21,9 @@ repositories {
     maven {
         url 'https://mvn.slimjars.com'
     }
+    maven {
+        url 'https://friwi.me/jcef/maven'
+    }
     mavenCentral()
 }
 
@@ -28,6 +31,7 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
+    implementation 'org.cef:jcef-main:84.3.8+gc8a556f+chromium-84.0.4147.105-build-17'
 }
 
 task copyJars(type: Copy) {

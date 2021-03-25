@@ -1,0 +1,7 @@
+#!/bin/bash
+
+DIR=$(dirname $0)
+CMD="$DIR/test-jcef.sh"
+CLASS="de.topobyte.jcef.TestJcef"
+
+exec "$CMD" "$CLASS" "$@"
