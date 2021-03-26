@@ -5,3 +5,7 @@ build
 .classpath
 .settings
 *.swp
+/java-cef-build-bin/
+/jcef-natives-linux64.jar
+/linux64.zip
+/native/
