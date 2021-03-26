@@ -6,13 +6,17 @@ package de.topobyte.jcef;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import org.cef.CefApp;
@@ -41,6 +45,7 @@ public class TestJcef extends JFrame
 {
 	private static final long serialVersionUID = -5570653778104813836L;
 	private final JTextField address;
+	private final JButton button;
 	private final CefApp cefApp;
 	private final CefClient client;
 	private final CefBrowser browser;
@@ -120,6 +125,10 @@ public class TestJcef extends JFrame
 		address.addActionListener(e -> {
 			browser.loadURL(address.getText());
 		});
+		button = new JButton("go");
+		button.addActionListener(e -> {
+			browser.loadURL(address.getText());
+		});
 
 		// Update the address field when the browser URL changes.
 		client.addDisplayHandler(new CefDisplayHandlerAdapter() {
@@ -167,9 +176,19 @@ public class TestJcef extends JFrame
 			}
 		});
 
+		// Set up an adress bar
+		JPanel bar = new JPanel(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridy = 0;
+		c.weightx = 1.0;
+		c.fill = GridBagConstraints.BOTH;
+		bar.add(address, c);
+		c.weightx = 0.0;
+		bar.add(button, c);
+
 		// (5) All UI components are assigned to the default content pane of
 		// this JFrame and afterwards the frame is made visible to the user.
-		getContentPane().add(address, BorderLayout.NORTH);
+		getContentPane().add(bar, BorderLayout.NORTH);
 		getContentPane().add(browerUI, BorderLayout.CENTER);
 		pack();
 		setSize(800, 600);
