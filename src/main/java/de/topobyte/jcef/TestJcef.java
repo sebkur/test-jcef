@@ -7,8 +7,6 @@ package de.topobyte.jcef;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.KeyboardFocusManager;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.WindowAdapter;
@@ -119,12 +117,8 @@ public class TestJcef extends JFrame
 		// If this happens, the entered value is passed to the CefBrowser
 		// instance to be loaded as URL.
 		address = new JTextField(startURL, 100);
-		address.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				browser.loadURL(address.getText());
-			}
+		address.addActionListener(e -> {
+			browser.loadURL(address.getText());
 		});
 
 		// Update the address field when the browser URL changes.
