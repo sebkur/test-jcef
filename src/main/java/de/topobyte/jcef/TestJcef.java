@@ -42,12 +42,12 @@ import org.cef.handler.CefFocusHandlerAdapter;
 public class TestJcef extends JFrame
 {
 	private static final long serialVersionUID = -5570653778104813836L;
-	private final JTextField address_;
-	private final CefApp cefApp_;
-	private final CefClient client_;
-	private final CefBrowser browser_;
-	private final Component browerUI_;
-	private boolean browserFocus_ = true;
+	private final JTextField address;
+	private final CefApp cefApp;
+	private final CefClient client;
+	private final CefBrowser browser;
+	private final Component browerUI;
+	private boolean browserFocus = true;
 
 	/**
 	 * To display a simple browser window, it suffices completely to create an
@@ -77,7 +77,7 @@ public class TestJcef extends JFrame
 		});
 		CefSettings settings = new CefSettings();
 		settings.windowless_rendering_enabled = useOSR;
-		cefApp_ = CefApp.getInstance(new String[] { "-disable-gpu=1" },
+		cefApp = CefApp.getInstance(new String[] { "-disable-gpu=1" },
 				settings);
 
 		// (2) JCEF can handle one to many browser instances simultaneous. These
@@ -94,7 +94,7 @@ public class TestJcef extends JFrame
 		// events. By assigning handlers to CefClient you can control the
 		// behavior of the browser. See tests.detailed.MainFrame for an example
 		// of how to use these handlers.
-		client_ = cefApp_.createClient();
+		client = cefApp.createClient();
 
 		// (3) One CefBrowser instance is responsible to control what you'll see
 		// on the UI component of the instance. It can be displayed off-screen
@@ -108,8 +108,8 @@ public class TestJcef extends JFrame
 		// by calling the method "getUIComponent()" on the instance of
 		// CefBrowser. The UI component is inherited from a java.awt.Component
 		// and therefore it can be embedded into any AWT UI.
-		browser_ = client_.createBrowser(startURL, useOSR, isTransparent);
-		browerUI_ = browser_.getUIComponent();
+		browser = client.createBrowser(startURL, useOSR, isTransparent);
+		browerUI = browser.getUIComponent();
 
 		// (4) For this minimal browser, we need only a text field to enter an
 		// URL we want to navigate to and a CefBrowser window to display the
@@ -118,49 +118,49 @@ public class TestJcef extends JFrame
 		// each time the user presses the "ENTER" key within the address field.
 		// If this happens, the entered value is passed to the CefBrowser
 		// instance to be loaded as URL.
-		address_ = new JTextField(startURL, 100);
-		address_.addActionListener(new ActionListener() {
+		address = new JTextField(startURL, 100);
+		address.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				browser_.loadURL(address_.getText());
+				browser.loadURL(address.getText());
 			}
 		});
 
 		// Update the address field when the browser URL changes.
-		client_.addDisplayHandler(new CefDisplayHandlerAdapter() {
+		client.addDisplayHandler(new CefDisplayHandlerAdapter() {
 			@Override
 			public void onAddressChange(CefBrowser browser, CefFrame frame,
 					String url)
 			{
-				address_.setText(url);
+				address.setText(url);
 			}
 		});
 
 		// Clear focus from the browser when the address field gains focus.
-		address_.addFocusListener(new FocusAdapter() {
+		address.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusGained(FocusEvent e)
 			{
-				if (!browserFocus_) {
+				if (!browserFocus) {
 					return;
 				}
-				browserFocus_ = false;
+				browserFocus = false;
 				KeyboardFocusManager.getCurrentKeyboardFocusManager()
 						.clearGlobalFocusOwner();
-				address_.requestFocus();
+				address.requestFocus();
 			}
 		});
 
 		// Clear focus from the address field when the browser gains focus.
-		client_.addFocusHandler(new CefFocusHandlerAdapter() {
+		client.addFocusHandler(new CefFocusHandlerAdapter() {
 			@Override
 			public void onGotFocus(CefBrowser browser)
 			{
-				if (browserFocus_) {
+				if (browserFocus) {
 					return;
 				}
-				browserFocus_ = true;
+				browserFocus = true;
 				KeyboardFocusManager.getCurrentKeyboardFocusManager()
 						.clearGlobalFocusOwner();
 				browser.setFocus(true);
@@ -169,14 +169,14 @@ public class TestJcef extends JFrame
 			@Override
 			public void onTakeFocus(CefBrowser browser, boolean next)
 			{
-				browserFocus_ = false;
+				browserFocus = false;
 			}
 		});
 
 		// (5) All UI components are assigned to the default content pane of
 		// this JFrame and afterwards the frame is made visible to the user.
-		getContentPane().add(address_, BorderLayout.NORTH);
-		getContentPane().add(browerUI_, BorderLayout.CENTER);
+		getContentPane().add(address, BorderLayout.NORTH);
+		getContentPane().add(browerUI, BorderLayout.CENTER);
 		pack();
 		setSize(800, 600);
 		setVisible(true);
