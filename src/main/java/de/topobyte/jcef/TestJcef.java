@@ -6,8 +6,11 @@ package de.topobyte.jcef;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -18,9 +21,11 @@ import org.cef.CefApp;
 import org.cef.CefApp.CefAppState;
 import org.cef.CefClient;
 import org.cef.CefSettings;
-import org.cef.OS;
 import org.cef.browser.CefBrowser;
+import org.cef.browser.CefFrame;
 import org.cef.handler.CefAppHandlerAdapter;
+import org.cef.handler.CefDisplayHandlerAdapter;
+import org.cef.handler.CefFocusHandlerAdapter;
 
 /**
  * This is a simple example application using JCEF. It displays a JFrame with a
@@ -32,7 +37,7 @@ import org.cef.handler.CefAppHandlerAdapter;
  * assist you to get familiar with JCEF.
  *
  * For a more feature complete example have also a look onto the example code
- * within the package "example.detailed".
+ * within the package "tests.detailed".
  */
 public class TestJcef extends JFrame
 {
@@ -42,6 +47,7 @@ public class TestJcef extends JFrame
 	private final CefClient client_;
 	private final CefBrowser browser_;
 	private final Component browerUI_;
+	private boolean browserFocus_ = true;
 
 	/**
 	 * To display a simple browser window, it suffices completely to create an
@@ -66,16 +72,14 @@ public class TestJcef extends JFrame
 			{
 				// Shutdown the app if the native CEF part is terminated
 				if (state == CefAppState.TERMINATED) {
-					// calling System.exit(0) appears to be causing assert
-					// errors,
-					// as its firing before all of the CEF objects shutdown.
-					// System.exit(0);
+					System.exit(0);
 				}
 			}
 		});
 		CefSettings settings = new CefSettings();
 		settings.windowless_rendering_enabled = useOSR;
-		cefApp_ = CefApp.getInstance(settings);
+		cefApp_ = CefApp.getInstance(new String[] { "-disable-gpu=1" },
+				settings);
 
 		// (2) JCEF can handle one to many browser instances simultaneous. These
 		// browser instances are logically grouped together by an instance of
@@ -89,8 +93,7 @@ public class TestJcef extends JFrame
 		// CefBrowser instances. Those events could be simple things like the
 		// change of the browser title or more complex ones like context menu
 		// events. By assigning handlers to CefClient you can control the
-		// behavior of the browser. See example.detailed.SimpleFrameExample for
-		// an example
+		// behavior of the browser. See tests.detailed.MainFrame for an example
 		// of how to use these handlers.
 		client_ = cefApp_.createClient();
 
@@ -128,6 +131,52 @@ public class TestJcef extends JFrame
 			}
 		});
 
+		// Update the address field when the browser URL changes.
+		client_.addDisplayHandler(new CefDisplayHandlerAdapter() {
+			@Override
+			public void onAddressChange(CefBrowser browser, CefFrame frame,
+					String url)
+			{
+				address_.setText(url);
+			}
+		});
+
+		// Clear focus from the browser when the address field gains focus.
+		address_.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent e)
+			{
+				if (!browserFocus_) {
+					return;
+				}
+				browserFocus_ = false;
+				KeyboardFocusManager.getCurrentKeyboardFocusManager()
+						.clearGlobalFocusOwner();
+				address_.requestFocus();
+			}
+		});
+
+		// Clear focus from the address field when the browser gains focus.
+		client_.addFocusHandler(new CefFocusHandlerAdapter() {
+			@Override
+			public void onGotFocus(CefBrowser browser)
+			{
+				if (browserFocus_) {
+					return;
+				}
+				browserFocus_ = true;
+				KeyboardFocusManager.getCurrentKeyboardFocusManager()
+						.clearGlobalFocusOwner();
+				browser.setFocus(true);
+			}
+
+			@Override
+			public void onTakeFocus(CefBrowser browser, boolean next)
+			{
+				browserFocus_ = false;
+			}
+		});
+
 		// (5) All UI components are assigned to the default content pane of
 		// this
 		// JFrame and afterwards the frame is made visible to the user.
@@ -153,16 +202,19 @@ public class TestJcef extends JFrame
 
 	public static void main(String[] args)
 	{
+		// Perform startup initialization on platforms that require it.
+		if (!CefApp.startup(args)) {
+			System.out.println("Startup initialization failed!");
+			return;
+		}
+
 		// The simple example application is created as anonymous class and
 		// points
-		// to Google as the very first loaded page. If this example is used on
-		// Linux, it's important to use OSR mode because windowed rendering is
-		// not
-		// supported yet. On Macintosh and Windows windowed rendering is used as
-		// default. If you want to test OSR mode on those platforms, simply
-		// replace
-		// "OS.isLinux()" with "true" and recompile.
-		new TestJcef("http://www.google.com", OS.isLinux(), false);
+		// to Google as the very first loaded page. Windowed rendering mode is
+		// used by
+		// default. If you want to test OSR mode set |useOsr| to true and
+		// recompile.
+		boolean useOsr = false;
+		new TestJcef("http://www.google.com", useOsr, false);
 	}
-
 }
