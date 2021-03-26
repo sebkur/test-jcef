@@ -58,9 +58,8 @@ public class TestJcef extends JFrame
 	private TestJcef(String startURL, boolean useOSR, boolean isTransparent)
 	{
 		// (1) The entry point to JCEF is always the class CefApp. There is only
-		// one
-		// instance per application and therefore you have to call the method
-		// "getInstance()" instead of a CTOR.
+		// one instance per application and therefore you have to call the
+		// method "getInstance()" instead of a CTOR.
 		//
 		// CefApp is responsible for the global CEF context. It loads all
 		// required native libraries, initializes CEF accordingly, starts a
@@ -98,8 +97,7 @@ public class TestJcef extends JFrame
 		client_ = cefApp_.createClient();
 
 		// (3) One CefBrowser instance is responsible to control what you'll see
-		// on
-		// the UI component of the instance. It can be displayed off-screen
+		// on the UI component of the instance. It can be displayed off-screen
 		// rendered or windowed rendered. To get an instance of CefBrowser you
 		// have to call the method "createBrowser()" of your CefClient
 		// instances.
@@ -108,18 +106,16 @@ public class TestJcef extends JFrame
 		// and many more which are used to control the behavior of the displayed
 		// content. The UI is held within a UI-Compontent which can be accessed
 		// by calling the method "getUIComponent()" on the instance of
-		// CefBrowser.
-		// The UI component is inherited from a java.awt.Component and therefore
-		// it can be embedded into any AWT UI.
+		// CefBrowser. The UI component is inherited from a java.awt.Component
+		// and therefore it can be embedded into any AWT UI.
 		browser_ = client_.createBrowser(startURL, useOSR, isTransparent);
 		browerUI_ = browser_.getUIComponent();
 
 		// (4) For this minimal browser, we need only a text field to enter an
-		// URL
-		// we want to navigate to and a CefBrowser window to display the content
-		// of the URL. To respond to the input of the user, we're registering an
-		// anonymous ActionListener. This listener is performed each time the
-		// user presses the "ENTER" key within the address field.
+		// URL we want to navigate to and a CefBrowser window to display the
+		// content of the URL. To respond to the input of the user, we're
+		// registering an anonymous ActionListener. This listener is performed
+		// each time the user presses the "ENTER" key within the address field.
 		// If this happens, the entered value is passed to the CefBrowser
 		// instance to be loaded as URL.
 		address_ = new JTextField(startURL, 100);
@@ -178,8 +174,7 @@ public class TestJcef extends JFrame
 		});
 
 		// (5) All UI components are assigned to the default content pane of
-		// this
-		// JFrame and afterwards the frame is made visible to the user.
+		// this JFrame and afterwards the frame is made visible to the user.
 		getContentPane().add(address_, BorderLayout.NORTH);
 		getContentPane().add(browerUI_, BorderLayout.CENTER);
 		pack();
@@ -187,8 +182,7 @@ public class TestJcef extends JFrame
 		setVisible(true);
 
 		// (6) To take care of shutting down CEF accordingly, it's important to
-		// call
-		// the method "dispose()" of the CefApp instance if the Java
+		// call the method "dispose()" of the CefApp instance if the Java
 		// application will be closed. Otherwise you'll get asserts from CEF.
 		addWindowListener(new WindowAdapter() {
 			@Override
@@ -209,11 +203,9 @@ public class TestJcef extends JFrame
 		}
 
 		// The simple example application is created as anonymous class and
-		// points
-		// to Google as the very first loaded page. Windowed rendering mode is
-		// used by
-		// default. If you want to test OSR mode set |useOsr| to true and
-		// recompile.
+		// points to Google as the very first loaded page. Windowed rendering
+		// mode is used by default. If you want to test OSR mode set |useOsr| to
+		// true and recompile.
 		boolean useOsr = false;
 		new TestJcef("http://www.google.com", useOsr, false);
 	}
