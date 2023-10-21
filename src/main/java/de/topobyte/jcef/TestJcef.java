@@ -13,6 +13,8 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -22,34 +24,40 @@ import javax.swing.JTextField;
 import org.cef.CefApp;
 import org.cef.CefApp.CefAppState;
 import org.cef.CefClient;
-import org.cef.CefSettings;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
-import org.cef.handler.CefAppHandlerAdapter;
+import org.cef.browser.CefMessageRouter;
 import org.cef.handler.CefDisplayHandlerAdapter;
 import org.cef.handler.CefFocusHandlerAdapter;
+
+import me.friwi.jcefmaven.CefAppBuilder;
+import me.friwi.jcefmaven.CefInitializationException;
+import me.friwi.jcefmaven.MavenCefAppHandlerAdapter;
+import me.friwi.jcefmaven.UnsupportedPlatformException;
+import me.friwi.jcefmaven.impl.progress.ConsoleProgressHandler;
 
 /**
  * This is a simple example application using JCEF. It displays a JFrame with a
  * JTextField at its top and a CefBrowser in its center. The JTextField is used
  * to enter and assign an URL to the browser UI. No additional handlers or
  * callbacks are used in this example.
- *
+ * <p>
  * The number of used JCEF classes is reduced (nearly) to its minimum and should
  * assist you to get familiar with JCEF.
- *
+ * <p>
  * For a more feature complete example have also a look onto the example code
  * within the package "tests.detailed".
  */
 public class TestJcef extends JFrame
 {
 	private static final long serialVersionUID = -5570653778104813836L;
-	private final JTextField address;
-	private final JButton button;
-	private final CefApp cefApp;
-	private final CefClient client;
-	private final CefBrowser browser;
-	private final Component browerUI;
+	private JTextField address;
+	private JButton button;
+	private CefApp cefApp;
+	private CefClient client;
+	private CefBrowser browser;
+
+	private Component browerUI;
 	private boolean browserFocus = true;
 
 	/**
@@ -59,29 +67,38 @@ public class TestJcef extends JFrame
 	 * CTOR keeps an instance of each object on the way to the browser UI.
 	 */
 	private TestJcef(String startURL, boolean useOSR, boolean isTransparent)
+			throws UnsupportedPlatformException, CefInitializationException,
+			IOException, InterruptedException
 	{
-		// (1) The entry point to JCEF is always the class CefApp. There is only
-		// one instance per application and therefore you have to call the
-		// method "getInstance()" instead of a CTOR.
-		//
-		// CefApp is responsible for the global CEF context. It loads all
-		// required native libraries, initializes CEF accordingly, starts a
-		// background task to handle CEF's message loop and takes care of
-		// shutting down CEF after disposing it.
-		CefApp.addAppHandler(new CefAppHandlerAdapter(null) {
+		// Create a new CefAppBuilder instance
+		CefAppBuilder builder = new CefAppBuilder();
+
+		// Configure the builder instance
+		builder.setInstallDir(new File("jcef-bundle")); // Default
+		builder.setProgressHandler(new ConsoleProgressHandler()); // Default
+		builder.getCefSettings().windowless_rendering_enabled = true;
+		// Default - select OSR mode
+
+		// Set an app handler. Do not use CefApp.addAppHandler(...), it will
+		// break your code on MacOSX!
+		builder.setAppHandler(new MavenCefAppHandlerAdapter() {
+			// CefApp is responsible for the global CEF context. It loads all
+			// required native libraries, initializes CEF accordingly, starts a
+			// background task to handle CEF's message loop and takes care of
+			// shutting down CEF after disposing it.
 			@Override
 			public void stateHasChanged(org.cef.CefApp.CefAppState state)
 			{
+				System.out.println(state);
 				// Shutdown the app if the native CEF part is terminated
 				if (state == CefAppState.TERMINATED) {
 					System.exit(0);
 				}
 			}
 		});
-		CefSettings settings = new CefSettings();
-		settings.windowless_rendering_enabled = useOSR;
-		cefApp = CefApp.getInstance(new String[] { "-disable-gpu=1" },
-				settings);
+
+		// Build a CefApp instance using the configuration above
+		cefApp = builder.build();
 
 		// (2) JCEF can handle one to many browser instances simultaneous. These
 		// browser instances are logically grouped together by an instance of
@@ -98,6 +115,9 @@ public class TestJcef extends JFrame
 		// behavior of the browser. See tests.detailed.MainFrame for an example
 		// of how to use these handlers.
 		client = cefApp.createClient();
+
+		CefMessageRouter msgRouter = CefMessageRouter.create();
+		client.addMessageRouter(msgRouter);
 
 		// (3) One CefBrowser instance is responsible to control what you'll see
 		// on the UI component of the instance. It can be displayed off-screen
@@ -201,19 +221,16 @@ public class TestJcef extends JFrame
 			@Override
 			public void windowClosing(WindowEvent e)
 			{
-				CefApp.getInstance().dispose();
+				cefApp.dispose();
 				dispose();
 			}
 		});
 	}
 
-	public static void main(String[] args)
+	public static void main(String[] args) throws UnsupportedPlatformException,
+			CefInitializationException, IOException, InterruptedException
 	{
 		// Perform startup initialization on platforms that require it.
-		if (!CefApp.startup(args)) {
-			System.out.println("Startup initialization failed!");
-			return;
-		}
 
 		// The simple example application is created as anonymous class and
 		// points to Google as the very first loaded page. Windowed rendering

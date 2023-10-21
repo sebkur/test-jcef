@@ -8,9 +8,6 @@ if [ ! -d "$LIBS" ]; then
 	exit 1
 fi
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/jvm/java-11-openjdk-amd64/lib/
-
 CLASSPATH="$LIBS/*"
-NATIVE=$DIR/../native/
 
-exec java -Djava.library.path="$NATIVE" -cp "$CLASSPATH" "$@"
+exec java -cp "$CLASSPATH" "$@"
