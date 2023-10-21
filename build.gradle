@@ -31,6 +31,8 @@ dependencies {
     implementation 'me.friwi:jcefmaven:110.0.25.1'
     // this version doesn't work on my Linux system, requires newer libc?
     //implementation 'me.friwi:jcefmaven:116.0.19'
+    implementation 'de.topobyte:shared-preferences:0.1.0'
+    implementation 'de.topobyte:swing-utils:0.0.13'
 }
 
 task copyJars(type: Copy) {

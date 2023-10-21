@@ -6,6 +6,7 @@ package de.topobyte.jcef;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.KeyboardFocusManager;
@@ -30,6 +31,8 @@ import org.cef.browser.CefMessageRouter;
 import org.cef.handler.CefDisplayHandlerAdapter;
 import org.cef.handler.CefFocusHandlerAdapter;
 
+import de.topobyte.shared.preferences.SharedPreferences;
+import de.topobyte.swing.util.SwingUtils;
 import me.friwi.jcefmaven.CefAppBuilder;
 import me.friwi.jcefmaven.CefInitializationException;
 import me.friwi.jcefmaven.MavenCefAppHandlerAdapter;
@@ -48,9 +51,9 @@ import me.friwi.jcefmaven.impl.progress.ConsoleProgressHandler;
  * For a more feature complete example have also a look onto the example code
  * within the package "tests.detailed".
  */
-public class TestJcef extends JFrame
+public class TestJcef
 {
-	private static final long serialVersionUID = -5570653778104813836L;
+
 	private JTextField address;
 	private JButton button;
 	private CefApp cefApp;
@@ -70,6 +73,12 @@ public class TestJcef extends JFrame
 			throws UnsupportedPlatformException, CefInitializationException,
 			IOException, InterruptedException
 	{
+		double factor = 1;
+		if (SharedPreferences.isUIScalePresent()) {
+			SwingUtils.setUiScale(SharedPreferences.getUIScale());
+			factor = SharedPreferences.getUIScale();
+		}
+
 		// Create a new CefAppBuilder instance
 		CefAppBuilder builder = new CefAppBuilder();
 
@@ -206,23 +215,25 @@ public class TestJcef extends JFrame
 		c.weightx = 0.0;
 		bar.add(button, c);
 
+		JFrame frame = new JFrame("Test JCEF");
 		// (5) All UI components are assigned to the default content pane of
 		// this JFrame and afterwards the frame is made visible to the user.
-		getContentPane().add(bar, BorderLayout.NORTH);
-		getContentPane().add(browerUI, BorderLayout.CENTER);
-		pack();
-		setSize(800, 600);
-		setVisible(true);
+		frame.getContentPane().add(bar, BorderLayout.NORTH);
+		frame.getContentPane().add(browerUI, BorderLayout.CENTER);
+		frame.pack();
+		frame.setMinimumSize(
+				new Dimension((int) (800 * factor), (int) (600 * factor)));
+		frame.setVisible(true);
 
 		// (6) To take care of shutting down CEF accordingly, it's important to
 		// call the method "dispose()" of the CefApp instance if the Java
 		// application will be closed. Otherwise you'll get asserts from CEF.
-		addWindowListener(new WindowAdapter() {
+		frame.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e)
 			{
 				cefApp.dispose();
-				dispose();
+				frame.dispose();
 			}
 		});
 	}
