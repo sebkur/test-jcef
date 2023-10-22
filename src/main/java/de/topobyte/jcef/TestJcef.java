@@ -85,7 +85,7 @@ public class TestJcef
 		// Configure the builder instance
 		builder.setInstallDir(new File("jcef-bundle")); // Default
 		builder.setProgressHandler(new ConsoleProgressHandler()); // Default
-		builder.getCefSettings().windowless_rendering_enabled = true;
+		builder.getCefSettings().windowless_rendering_enabled = false;
 		// Default - select OSR mode
 
 		// Set an app handler. Do not use CefApp.addAppHandler(...), it will
