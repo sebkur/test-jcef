@@ -14,8 +14,6 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -23,21 +21,18 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import org.cef.CefApp;
-import org.cef.CefApp.CefAppState;
 import org.cef.CefClient;
+import org.cef.CefSettings;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
 import org.cef.browser.CefMessageRouter;
 import org.cef.handler.CefDisplayHandlerAdapter;
 import org.cef.handler.CefFocusHandlerAdapter;
 
+import com.jetbrains.cef.JCefAppConfig;
+
 import de.topobyte.shared.preferences.SharedPreferences;
 import de.topobyte.swing.util.SwingUtils;
-import me.friwi.jcefmaven.CefAppBuilder;
-import me.friwi.jcefmaven.CefInitializationException;
-import me.friwi.jcefmaven.MavenCefAppHandlerAdapter;
-import me.friwi.jcefmaven.UnsupportedPlatformException;
-import me.friwi.jcefmaven.impl.progress.ConsoleProgressHandler;
 
 /**
  * This is a simple example application using JCEF. It displays a JFrame with a
@@ -70,8 +65,6 @@ public class TestJcef
 	 * CTOR keeps an instance of each object on the way to the browser UI.
 	 */
 	private TestJcef(String startURL, boolean useOSR, boolean isTransparent)
-			throws UnsupportedPlatformException, CefInitializationException,
-			IOException, InterruptedException
 	{
 		double factor = 1;
 		if (SharedPreferences.isUIScalePresent()) {
@@ -80,34 +73,16 @@ public class TestJcef
 		}
 
 		// Create a new CefAppBuilder instance
-		CefAppBuilder builder = new CefAppBuilder();
-
-		// Configure the builder instance
-		builder.setInstallDir(new File("jcef-bundle")); // Default
-		builder.setProgressHandler(new ConsoleProgressHandler()); // Default
-		builder.getCefSettings().windowless_rendering_enabled = false;
 		// Default - select OSR mode
 
 		// Set an app handler. Do not use CefApp.addAppHandler(...), it will
 		// break your code on MacOSX!
-		builder.setAppHandler(new MavenCefAppHandlerAdapter() {
-			// CefApp is responsible for the global CEF context. It loads all
-			// required native libraries, initializes CEF accordingly, starts a
-			// background task to handle CEF's message loop and takes care of
-			// shutting down CEF after disposing it.
-			@Override
-			public void stateHasChanged(org.cef.CefApp.CefAppState state)
-			{
-				System.out.println(state);
-				// Shutdown the app if the native CEF part is terminated
-				if (state == CefAppState.TERMINATED) {
-					System.exit(0);
-				}
-			}
-		});
+
+		CefApp.startup(new String[0]);
 
 		// Build a CefApp instance using the configuration above
-		cefApp = builder.build();
+		CefSettings settings = JCefAppConfig.getInstance().getCefSettings();
+		cefApp = CefApp.getInstance(settings);
 
 		// (2) JCEF can handle one to many browser instances simultaneous. These
 		// browser instances are logically grouped together by an instance of
@@ -238,8 +213,7 @@ public class TestJcef
 		});
 	}
 
-	public static void main(String[] args) throws UnsupportedPlatformException,
-			CefInitializationException, IOException, InterruptedException
+	public static void main(String[] args)
 	{
 		// Perform startup initialization on platforms that require it.
 
